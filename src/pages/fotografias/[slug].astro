@@ -1,0 +1,84 @@
+---
+import { render } from 'astro:content';
+import Arrow from '@/components/ornaments/Arrow.astro';
+import PageHead from '@/components/ui/PageHead.astro';
+import { roomById } from '@/config/site';
+import Base from '@/layouts/Base.astro';
+import { getPhotographs, type Photograph } from '@/lib/collections';
+
+export async function getStaticPaths() {
+  const photographs = await getPhotographs();
+  return photographs.map((photograph) => ({ params: { slug: photograph.slug }, props: { photograph } }));
+}
+
+interface Props {
+  photograph: Photograph;
+}
+const { image, entry } = Astro.props.photograph;
+const { title, author, year, place, process, summary } = entry.data;
+
+const room = roomById('photographs');
+const { Content } = await render(entry);
+const facts = [author, place, year, process].filter(Boolean).join(' · ');
+---
+
+<Base title={title} description={summary}>
+  <article>
+    <PageHead kicker={room.label} title={title} lead={summary}>
+      {facts && <p class="facts">{facts}</p>}
+    </PageHead>
+
+    {
+      image && (
+        <figure class="plate wrap">
+          <img src={image} alt={title} />
+        </figure>
+      )
+    }
+
+    {
+      entry.body?.trim() && (
+        <div class="prose wrap" data-reveal>
+          <Content />
+        </div>
+      )
+    }
+
+    <p class="back wrap">
+      <a class="more" href={room.href}>Volver a la {room.label.toLowerCase()} <Arrow /></a>
+    </p>
+  </article>
+</Base>
+
+<style>
+  .facts {
+    font-family: var(--font-caps);
+    font-size: var(--step--1);
+    letter-spacing: 0.18em;
+    font-variant-numeric: lining-nums;
+    color: var(--text-dim);
+  }
+
+  .plate {
+    display: grid;
+    justify-items: center;
+    margin-bottom: clamp(2.5rem, 6vw, 4.5rem);
+  }
+
+  .plate img {
+    max-height: 82svh;
+    width: auto;
+    padding: clamp(0.5rem, 1.4vw, 1rem);
+    background: linear-gradient(to top, #d8c79f, #b9a780);
+    box-shadow:
+      inset 0 0 0 1px rgb(31 21 14 / 0.3),
+      0 3rem 6rem -2rem #000;
+    filter: sepia(0.25);
+  }
+
+  .back {
+    margin-top: clamp(3rem, 8vw, 5rem);
+    padding-bottom: clamp(3rem, 8vw, 6rem);
+    text-align: center;
+  }
+</style>

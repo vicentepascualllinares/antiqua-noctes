@@ -1,0 +1,115 @@
+---
+import Arrow from '@/components/ornaments/Arrow.astro';
+import ClosedRoom from '@/components/ui/ClosedRoom.astro';
+import PageHead from '@/components/ui/PageHead.astro';
+import { roomById } from '@/config/site';
+import Base from '@/layouts/Base.astro';
+import { getProducts } from '@/lib/collections';
+
+const room = roomById('shop');
+const products = await getProducts();
+---
+
+<Base title={room.label} description={room.blurb}>
+  <PageHead kicker={`Estancia ${room.numeral}`} title={room.label} lead={room.blurb} />
+
+  {
+    products.length > 0 ? (
+      <div class="wrap">
+        <ul class="wares">
+          {products.map(({ image, entry }, index) => (
+            <li class="ware" data-reveal style={`--i:${index % 3}`}>
+              <div class="ware__image">
+                {image ? <img src={image} alt="" loading="lazy" decoding="async" /> : <span>{entry.data.kind}</span>}
+              </div>
+              <p class="kicker">{entry.data.kind}</p>
+              <h2 class="ware__title">{entry.data.title}</h2>
+              {entry.data.summary && <p class="ware__summary">{entry.data.summary}</p>}
+              <p class="ware__foot">
+                {entry.data.price && <span class="ware__price">{entry.data.price}</span>}
+                {entry.data.url ? (
+                  <a class="cta" href={entry.data.url} target="_blank" rel="noopener">
+                    Adquirir <Arrow />
+                  </a>
+                ) : (
+                  <span class="ware__soon">Próximamente</span>
+                )}
+              </p>
+            </li>
+          ))}
+        </ul>
+      </div>
+    ) : (
+      <ClosedRoom room={room} back={{ href: roomById('films').href, label: 'Ir al cinematógrafo' }} />
+    )
+  }
+</Base>
+
+<style>
+  .wares {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 18rem), 1fr));
+    gap: clamp(2.2rem, 5vw, 4rem) clamp(1.6rem, 3vw, 2.8rem);
+    padding-bottom: clamp(4rem, 10vw, 8rem);
+  }
+
+  .ware {
+    display: grid;
+    align-content: start;
+    gap: 0.7rem;
+  }
+
+  .ware__image {
+    display: grid;
+    place-items: center;
+    aspect-ratio: 4 / 5;
+    margin-bottom: 0.6rem;
+    overflow: hidden;
+    border: 1px solid var(--rule);
+    background: radial-gradient(ellipse 100% 70% at 50% 115%, rgb(217 100 42 / 0.28), transparent 70%), var(--soot-800);
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: var(--step-2);
+    color: var(--text-dim);
+  }
+
+  .ware__image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .ware__title {
+    font-family: var(--font-title);
+    font-size: var(--step-1);
+    line-height: 1.2;
+  }
+
+  .ware__summary {
+    font-size: var(--step--1);
+    font-style: italic;
+  }
+
+  .ware__foot {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-top: 0.5rem;
+  }
+
+  .ware__price {
+    font-family: var(--font-display);
+    font-size: var(--step-1);
+    font-variant-numeric: lining-nums;
+    color: var(--text-bright);
+  }
+
+  .ware__soon {
+    font-family: var(--font-caps);
+    font-size: var(--step--1);
+    letter-spacing: 0.16em;
+    color: var(--text-dim);
+  }
+</style>

@@ -1,0 +1,68 @@
+---
+import { render } from 'astro:content';
+import Arrow from '@/components/ornaments/Arrow.astro';
+import PageHead from '@/components/ui/PageHead.astro';
+import { roomById } from '@/config/site';
+import Base from '@/layouts/Base.astro';
+import { getReadings, type Reading } from '@/lib/collections';
+import { toRoman } from '@/lib/format';
+
+export async function getStaticPaths() {
+  const readings = await getReadings();
+  return readings.map((reading) => ({ params: { slug: reading.slug }, props: { reading } }));
+}
+
+interface Props {
+  reading: Reading;
+}
+const { entry } = Astro.props.reading;
+const { title, author, year, kind, translator, summary } = entry.data;
+
+const room = roomById('literature');
+const { Content } = await render(entry);
+// Los poemas se componen verso a verso, sin sangrías ni capitular
+const verse = /poema|poes[ií]a|verso|soneto/i.test(kind ?? '');
+const byline = [author, year && toRoman(year)].filter(Boolean).join(' · ');
+---
+
+<Base title={author ? `${title}, de ${author}` : title} description={summary}>
+  <article>
+    <PageHead kicker={kind ?? room.label} title={title} lead={summary}>
+      {byline && <p class="byline">{byline}</p>}
+      {translator && <p class="byline byline--minor">Traducción de {translator}</p>}
+    </PageHead>
+
+    <div class:list={['reading prose wrap', { 'prose--verse': verse }]}>
+      <Content />
+    </div>
+
+    <p class="back wrap">
+      <a class="more" href={room.href}>Volver a la {room.label.toLowerCase()} <Arrow /></a>
+    </p>
+  </article>
+</Base>
+
+<style>
+  .byline {
+    font-family: var(--font-caps);
+    font-size: var(--step--1);
+    letter-spacing: 0.2em;
+    font-variant-numeric: lining-nums;
+    color: var(--text-dim);
+  }
+
+  .byline--minor {
+    letter-spacing: 0.12em;
+  }
+
+  .reading {
+    font-size: 1.06em;
+    line-height: 1.8;
+  }
+
+  .back {
+    margin-top: clamp(3rem, 8vw, 5rem);
+    padding-bottom: clamp(3rem, 8vw, 6rem);
+    text-align: center;
+  }
+</style>

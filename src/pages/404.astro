@@ -1,0 +1,37 @@
+---
+import Arrow from '@/components/ornaments/Arrow.astro';
+import Plaque from '@/components/ui/Plaque.astro';
+import Base from '@/layouts/Base.astro';
+---
+
+<Base title="Página extraviada">
+  <section class="lost wrap wrap--narrow">
+    <Plaque>
+      <p class="kicker">Página extraviada</p>
+      <h1 class="lost__title">Se ha perdido usted por el pasillo</h1>
+      <p>Tras esta puerta no hay más que sombra. La lumbre queda por el otro lado.</p>
+      <a class="cta" href="/">Volver a la portada <Arrow /></a>
+    </Plaque>
+  </section>
+</Base>
+
+<style>
+  .lost {
+    display: grid;
+    align-content: center;
+    min-height: 100svh;
+    padding-block: calc(var(--header-h) + 2rem) 4rem;
+  }
+
+  .lost__title {
+    max-width: 16ch;
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: var(--step-3);
+    line-height: 1.08;
+  }
+
+  .lost .cta {
+    margin-top: 0.8rem;
+  }
+</style>

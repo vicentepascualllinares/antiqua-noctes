@@ -1,0 +1,18 @@
+{
+  "dependencies": {
+    "@fontsource/im-fell-double-pica": "^5.3.0",
+    "@fontsource/im-fell-english-sc": "^5.3.0",
+    "@fontsource/im-fell-french-canon": "^5.3.0",
+    "@fontsource/libre-caslon-text": "^5.3.0",
+    "astro": "^7.3.8"
+  },
+  "name": "antiqua-noctes-web",
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview"
+  },
+  "private": true
+}

@@ -1,0 +1,118 @@
+---
+import ClosedRoom from '@/components/ui/ClosedRoom.astro';
+import PageHead from '@/components/ui/PageHead.astro';
+import { roomById } from '@/config/site';
+import Base from '@/layouts/Base.astro';
+import { getPhotographs } from '@/lib/collections';
+
+const room = roomById('photographs');
+const photographs = await getPhotographs();
+---
+
+<Base title={room.label} description={room.blurb}>
+  <PageHead kicker={`Estancia ${room.numeral}`} title={room.label} lead={room.blurb} />
+
+  {
+    photographs.length > 0 ? (
+      <div class="wrap">
+        <ul class="cards">
+          {photographs.map(({ href, image, entry }, index) => (
+            <li data-reveal style={`--i:${index % 3}`}>
+              <a class="card" href={href}>
+                {/* Montada como un retrato de gabinete: cartulina, imagen y pie impreso */}
+                <span class="card__mount">
+                  {image ? (
+                    <img src={image} alt={entry.data.title} loading="lazy" decoding="async" />
+                  ) : (
+                    <span class="card__void">Placa extraviada</span>
+                  )}
+                  <span class="card__imprint">
+                    <span class="card__title">{entry.data.title}</span>
+                    <span>{[entry.data.author, entry.data.year].filter(Boolean).join(' · ')}</span>
+                  </span>
+                </span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    ) : (
+      <ClosedRoom room={room} back={{ href: roomById('films').href, label: 'Ir al cinematógrafo' }} />
+    )
+  }
+</Base>
+
+<style>
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 17rem), 1fr));
+    gap: clamp(1.8rem, 4vw, 3.2rem);
+    align-items: start;
+    padding-bottom: clamp(4rem, 10vw, 8rem);
+  }
+
+  .card {
+    display: block;
+    color: var(--paper-ink);
+    text-decoration: none;
+  }
+
+  .card__mount {
+    display: grid;
+    gap: 0.9rem;
+    padding: 0.85rem 0.85rem 1.1rem;
+    background:
+      radial-gradient(ellipse 120% 60% at 50% 120%, rgb(236 141 68 / 0.35), transparent 65%),
+      linear-gradient(to top, #d8c79f, #b9a780);
+    box-shadow:
+      inset 0 0 0 1px rgb(31 21 14 / 0.25),
+      inset 0 0 0 4px rgb(157 125 69 / 0.28),
+      0 1.6rem 2.6rem -1.5rem #000;
+    transition: transform 0.9s var(--ease-lamp);
+  }
+
+  .card:hover .card__mount,
+  .card:focus-visible .card__mount {
+    transform: translateY(-0.3rem) rotate(-0.4deg);
+  }
+
+  .card img {
+    width: 100%;
+    height: auto;
+    filter: sepia(0.35) contrast(1.04) brightness(0.9);
+    box-shadow: 0 0 0 1px rgb(31 21 14 / 0.5);
+    transition: filter 1s var(--ease-lamp);
+  }
+
+  .card:hover img {
+    filter: sepia(0.2) brightness(1);
+  }
+
+  .card__void {
+    display: grid;
+    place-items: center;
+    aspect-ratio: 4 / 5;
+    background: #15100c;
+    font-style: italic;
+    color: var(--text-dim);
+  }
+
+  .card__imprint {
+    display: grid;
+    gap: 0.15rem;
+    font-family: var(--font-caps);
+    font-size: 0.8rem;
+    letter-spacing: 0.14em;
+    font-variant-numeric: lining-nums;
+    text-align: center;
+    color: var(--paper-ink-dim);
+  }
+
+  .card__title {
+    font-family: var(--font-title);
+    font-style: italic;
+    font-size: var(--step-0);
+    letter-spacing: 0;
+    color: var(--paper-ink);
+  }
+</style>

@@ -1,0 +1,84 @@
+---
+/**
+ * Cartela de esquinas rebajadas, como los rótulos del cine mudo.
+ * Sirve para avisos, estancias cerradas y las cartelas del proyector.
+ */
+interface Props {
+  class?: string;
+}
+const { class: className } = Astro.props;
+---
+
+<div class:list={['plaque', className]}>
+  <i class="plaque__corner plaque__corner--tl"></i>
+  <i class="plaque__corner plaque__corner--tr"></i>
+  <i class="plaque__corner plaque__corner--bl"></i>
+  <i class="plaque__corner plaque__corner--br"></i>
+  <div class="plaque__body"><slot /></div>
+</div>
+
+<style>
+  .plaque {
+    --r: 1.15rem;
+    --line: rgb(237 223 192 / 0.46);
+    position: relative;
+    padding: clamp(1.9rem, 5vw, 3.4rem) clamp(1.4rem, 5vw, 3.4rem);
+    text-align: center;
+  }
+
+  .plaque::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+      linear-gradient(var(--line) 0 0) top / calc(100% - 2 * var(--r)) 1px,
+      linear-gradient(var(--line) 0 0) bottom / calc(100% - 2 * var(--r)) 1px,
+      linear-gradient(var(--line) 0 0) left / 1px calc(100% - 2 * var(--r)),
+      linear-gradient(var(--line) 0 0) right / 1px calc(100% - 2 * var(--r));
+    background-repeat: no-repeat;
+  }
+
+  .plaque__corner {
+    position: absolute;
+    width: var(--r);
+    height: var(--r);
+    border: 0 solid var(--line);
+    pointer-events: none;
+  }
+
+  .plaque__corner--tl {
+    top: 0;
+    left: 0;
+    border-width: 0 1px 1px 0;
+    border-bottom-right-radius: 100%;
+  }
+
+  .plaque__corner--tr {
+    top: 0;
+    right: 0;
+    border-width: 0 0 1px 1px;
+    border-bottom-left-radius: 100%;
+  }
+
+  .plaque__corner--bl {
+    bottom: 0;
+    left: 0;
+    border-width: 1px 1px 0 0;
+    border-top-right-radius: 100%;
+  }
+
+  .plaque__corner--br {
+    right: 0;
+    bottom: 0;
+    border-width: 1px 0 0 1px;
+    border-top-left-radius: 100%;
+  }
+
+  .plaque__body {
+    position: relative;
+    display: grid;
+    justify-items: center;
+    gap: 1.1rem;
+  }
+</style>

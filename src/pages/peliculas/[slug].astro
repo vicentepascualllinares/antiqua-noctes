@@ -1,0 +1,366 @@
+---
+import { render } from 'astro:content';
+import Projector from '@/components/films/Projector.astro';
+import Arrow from '@/components/ornaments/Arrow.astro';
+import SwelledRule from '@/components/ornaments/SwelledRule.astro';
+import DevNote from '@/components/ui/DevNote.astro';
+import { roomById } from '@/config/site';
+import Base from '@/layouts/Base.astro';
+import { getProductsFor } from '@/lib/collections';
+import { getFilms, type Film } from '@/lib/films';
+import { formatDuration, isoDuration, toRoman } from '@/lib/format';
+
+export async function getStaticPaths() {
+  const films = await getFilms();
+  return films.map((film, index) => ({
+    params: { slug: film.slug },
+    props: { film, previous: films[index - 1], next: films[index + 1] },
+  }));
+}
+
+interface Props {
+  film: Film;
+  previous?: Film;
+  next?: Film;
+}
+const { film, previous, next } = Astro.props;
+
+const room = roomById('films');
+const Content = film.sheet ? (await render(film.sheet)).Content : undefined;
+const hasText = Boolean(film.sheet?.body?.trim());
+// Artículos del bazar cuya ficha dice `related: films/<esta-cinta>`
+const wares = await getProductsFor(`films/${film.slug}`);
+
+const facts = [
+  { label: 'Año', value: film.year ? String(film.year) : undefined },
+  { label: 'Dirección', value: film.director },
+  { label: 'Cámara', value: film.cinematographer },
+  { label: 'Reparto', value: film.cast?.join(' · ') },
+  { label: 'Producción', value: film.studio },
+  { label: 'País', value: film.country },
+  { label: 'Sonido', value: film.silent ? 'Muda' : 'Sonora' },
+  { label: 'Color', value: film.colour },
+  ...(film.facts ?? []).map((fact) => ({ label: fact.term, value: fact.detail })),
+].filter((fact) => fact.value);
+---
+
+<Base title={film.title} description={film.summary}>
+  <article class="film">
+    <div class="film__stage wrap">
+      <nav class="film__crumbs" aria-label="Dónde se encuentra">
+        <a href={room.href}>{room.label}</a>
+        <span aria-hidden="true">·</span>
+        <span>N.º {toRoman(film.number)}</span>
+      </nav>
+      <Projector film={film} />
+    </div>
+
+    <header class="film__head wrap wrap--narrow">
+      <h1 class="film__title">{film.title}</h1>
+      {film.originalTitle && <p class="film__original">{film.originalTitle}</p>}
+      <SwelledRule />
+      {film.summary && <p class="lead">{film.summary}</p>}
+    </header>
+
+    <div class:list={['film__body wrap', { 'film__body--alone': !hasText }]}>
+      {
+        hasText && Content && (
+          <div class="prose" data-reveal>
+            <Content />
+          </div>
+        )
+      }
+
+      <aside class="sheet" data-reveal style="--i:1" aria-labelledby="ficha">
+        <h2 class="kicker" id="ficha">Ficha</h2>
+        <dl>
+          {
+            facts.map((fact) => (
+              <div>
+                <dt>{fact.label}</dt>
+                <span class="leader" />
+                <dd>{fact.value}</dd>
+              </div>
+            ))
+          }
+          <div>
+            <dt>Duración</dt>
+            <span class="leader"></span>
+            <dd>
+              <time datetime={isoDuration(film.duration)} data-runtime={film.duration ? 'known' : ''}>
+                {formatDuration(film.duration) ?? '—'}
+              </time>
+            </dd>
+          </div>
+        </dl>
+      </aside>
+    </div>
+
+    {
+      wares.length > 0 && (
+        <aside class="keepsakes wrap wrap--narrow" data-reveal aria-labelledby="para-llevar">
+          <h2 class="kicker" id="para-llevar">Para llevarse esta cinta a casa</h2>
+          <ul>
+            {wares.map(({ entry }) => (
+              <li>
+                <span class="keepsakes__name">{entry.data.title}</span>
+                <span class="leader" />
+                <span class="keepsakes__data">{[entry.data.kind, entry.data.price].filter(Boolean).join(' · ')}</span>
+                {entry.data.url ? (
+                  <a class="more" href={entry.data.url} target="_blank" rel="noopener">
+                    Adquirir <Arrow />
+                  </a>
+                ) : (
+                  <span class="keepsakes__soon">Próximamente</span>
+                )}
+              </li>
+            ))}
+          </ul>
+        </aside>
+      )
+    }
+
+    <div class="wrap">
+      {
+        !film.video && (
+          <DevNote>
+            <p>
+              Hay ficha, pero falta la bobina. Copia <code>{film.expectedFile}</code> en{' '}
+              <code>web/public/media/films/</code>.
+            </p>
+          </DevNote>
+        )
+      }
+      {
+        !film.sheet && (
+          <DevNote>
+            <p>
+              Esta cinta se anuncia con lo que dice el nombre del archivo. Para ponerle título, año y texto, crea{' '}
+              <code>web/src/content/films/{film.slug}.md</code> a partir de <code>_plantilla.md</code>.
+            </p>
+          </DevNote>
+        )
+      }
+    </div>
+
+    <nav class="pager wrap" aria-label="Otras cintas del programa">
+      {
+        previous ? (
+          <a class="pager__link" href={previous.href} rel="prev">
+            <span class="pager__way">Cinta anterior</span>
+            <span class="pager__title">{previous.title}</span>
+          </a>
+        ) : (
+          <span />
+        )
+      }
+      <a class="pager__all" href={room.href}>Todo el programa</a>
+      {
+        next ? (
+          <a class="pager__link pager__link--next" href={next.href} rel="next">
+            <span class="pager__way">Cinta siguiente</span>
+            <span class="pager__title">{next.title}</span>
+          </a>
+        ) : (
+          <span />
+        )
+      }
+    </nav>
+  </article>
+</Base>
+
+<style>
+  .film__stage {
+    display: grid;
+    gap: 1.3rem;
+    padding-top: calc(var(--header-h) + clamp(0.6rem, 2.4vw, 1.8rem));
+  }
+
+  .film__crumbs {
+    display: flex;
+    justify-content: center;
+    gap: 0.9em;
+    font-family: var(--font-caps);
+    font-size: var(--step--1);
+    letter-spacing: 0.18em;
+    font-variant-numeric: lining-nums;
+    color: var(--text-dim);
+  }
+
+  .film__crumbs a {
+    color: var(--brass-300);
+    text-decoration: none;
+  }
+
+  .film__crumbs a:hover {
+    color: var(--ember-300);
+  }
+
+  .film__head {
+    display: grid;
+    justify-items: center;
+    gap: 1.1rem;
+    padding-block: clamp(2.8rem, 7vw, 5rem) clamp(2.2rem, 5vw, 3.6rem);
+    text-align: center;
+  }
+
+  .film__title {
+    font-family: var(--font-display);
+    font-size: var(--step-4);
+    line-height: 1;
+  }
+
+  .film__original {
+    font-family: var(--font-title);
+    font-style: italic;
+    font-size: var(--step-1);
+    color: var(--text-dim);
+  }
+
+  .film__head .lead {
+    max-width: 40ch;
+  }
+
+  .film__body {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(15rem, 19rem);
+    gap: clamp(2.5rem, 7vw, 6rem);
+    align-items: start;
+    max-width: 66rem;
+  }
+
+  .film__body--alone {
+    grid-template-columns: minmax(0, 24rem);
+    justify-content: center;
+  }
+
+  .sheet dl {
+    display: grid;
+    margin-top: 0.9rem;
+    font-size: var(--step--1);
+  }
+
+  .sheet dl > div {
+    display: flex;
+    align-items: baseline;
+    padding-block: 0.42rem;
+  }
+
+  .sheet dt {
+    font-family: var(--font-caps);
+    letter-spacing: 0.14em;
+    color: var(--text-dim);
+  }
+
+  .sheet dd {
+    text-align: right;
+    font-variant-numeric: lining-nums;
+    color: var(--text-bright);
+  }
+
+  .keepsakes {
+    margin-top: clamp(3rem, 8vw, 5.5rem);
+    padding: 1.6rem 0 0.4rem;
+    border-top: 1px solid var(--rule-faint);
+    text-align: center;
+  }
+
+  .keepsakes ul {
+    margin-top: 1rem;
+    text-align: left;
+  }
+
+  .keepsakes li {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.4rem 0;
+    padding-block: 0.7rem;
+  }
+
+  .keepsakes__name {
+    font-family: var(--font-title);
+    font-style: italic;
+    font-size: var(--step-1);
+    color: var(--text-bright);
+  }
+
+  .keepsakes__data,
+  .keepsakes__soon {
+    margin-right: 1.4rem;
+    font-family: var(--font-caps);
+    font-size: var(--step--1);
+    letter-spacing: 0.14em;
+    font-variant-numeric: lining-nums;
+    color: var(--text-dim);
+  }
+
+  .keepsakes__soon {
+    margin-right: 0;
+  }
+
+  .pager {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 1.5rem;
+    align-items: center;
+    margin-top: clamp(4rem, 10vw, 7rem);
+    padding-block: 2.2rem clamp(2rem, 6vw, 4rem);
+    border-top: 1px solid var(--rule-faint);
+  }
+
+  .pager__link {
+    display: grid;
+    gap: 0.3rem;
+    text-decoration: none;
+  }
+
+  .pager__link--next {
+    text-align: right;
+  }
+
+  .pager__way,
+  .pager__all {
+    font-family: var(--font-caps);
+    font-size: var(--step--1);
+    letter-spacing: 0.18em;
+  }
+
+  .pager__way {
+    color: var(--brass-300);
+  }
+
+  .pager__title {
+    font-family: var(--font-title);
+    font-style: italic;
+    font-size: var(--step-1);
+    line-height: 1.2;
+    color: var(--text-bright);
+    transition: color 0.45s var(--ease-lamp);
+  }
+
+  .pager__link:hover .pager__title {
+    color: var(--ember-300);
+  }
+
+  .pager__all {
+    color: var(--text-dim);
+    text-decoration: none;
+  }
+
+  @media (max-width: 52rem) {
+    .film__body {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .pager {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .pager__all {
+      grid-column: 1 / -1;
+      grid-row: 2;
+      justify-self: center;
+    }
+  }
+</style>

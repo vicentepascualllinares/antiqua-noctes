@@ -1,0 +1,452 @@
+---
+import { site } from '@/config/site';
+import { getRoomStates } from '@/lib/rooms';
+import Logo from './Logo.astro';
+
+interface Props {
+  /** En la portada el nombre grande ya está a la vista: el de la cabecera espera. */
+  overMasthead?: boolean;
+}
+const { overMasthead = false } = Astro.props;
+
+const rooms = await getRoomStates();
+const path = Astro.url.pathname;
+
+const controls = [
+  { key: 'sound', label: 'Sonido de la tormenta' },
+  { key: 'storm', label: 'Relámpagos' },
+  { key: 'candle', label: 'Luz de vela' },
+];
+---
+
+<header class:list={['header', { 'is-over-masthead': overMasthead }]} data-header>
+  <div class="header__bar wrap">
+    <a class="header__brand" href="/" aria-label={`${site.name}, portada`}>
+      <Logo variant="header" />
+    </a>
+
+    <nav class="header__nav" aria-label="Estancias de la casa">
+      <ul>
+        {
+          rooms.map((room) => (
+            <li>
+              <a
+                href={room.href}
+                class:list={{ 'is-dark': !room.open }}
+                aria-current={path.startsWith(room.href) ? 'page' : undefined}
+              >
+                {room.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+
+    <div class="header__tools">
+      <button class="header__tool" type="button" data-atmos-open aria-expanded="false" aria-controls="ambiente">
+        <svg class="flame" data-sound-flame viewBox="0 0 16 24" aria-hidden="true" focusable="false">
+          <path d="M8 1.500C8 1.500 13.500 9 13.500 15a5.500 5.500 0 0 1-11 0C2.500 9 8 1.500 8 1.500Z"></path>
+        </svg>
+        <span class="header__tool-label">Ambiente</span>
+      </button>
+      <button class="header__tool header__tool--menu" type="button" data-menu-open aria-haspopup="dialog">
+        Índice
+      </button>
+    </div>
+
+    <div class="atmos" id="ambiente" data-atmos-panel hidden>
+      <p class="atmos__title">Ambiente de la sala</p>
+      <ul>
+        {
+          controls.map((control) => (
+            <li>
+              <button type="button" data-atmos={control.key} aria-pressed="false">
+                <span class="lamp" />
+                <span>{control.label}</span>
+                <span class="leader" />
+                <span class="atmos__state" data-atmos-state>
+                  apagado
+                </span>
+              </button>
+            </li>
+          ))
+        }
+      </ul>
+      <p class="atmos__note">La lluvia, la lumbre y los truenos se hacen aquí mismo, en el momento.</p>
+    </div>
+  </div>
+
+  <dialog class="menu" data-menu aria-label="Índice de la casa">
+    <div class="menu__sheet">
+      <button class="menu__close" type="button" data-menu-close>Cerrar</button>
+      <ul>
+        {
+          rooms.map((room) => (
+            <li>
+              <a href={room.href} class:list={{ 'is-dark': !room.open }}>
+                <span class="menu__numeral">{room.numeral}</span>
+                <span class="menu__label">{room.label}</span>
+                <span class="menu__plain">{room.open ? room.plain : 'Aún a oscuras'}</span>
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+      <a class="menu__home" href="/">Volver a la portada</a>
+    </div>
+  </dialog>
+</header>
+
+<style>
+  .header {
+    position: fixed;
+    inset: 0 0 auto;
+    z-index: 30;
+    font-family: var(--font-caps);
+    font-size: var(--step--1);
+    letter-spacing: 0.16em;
+    transition:
+      transform 0.7s var(--ease-lamp),
+      opacity 0.9s var(--ease-lamp);
+  }
+
+  /* Un velo de sombra en lugar de una barra: el contenido se pierde hacia arriba */
+  .header::before {
+    content: '';
+    position: absolute;
+    inset: 0 0 -2.2rem;
+    background: linear-gradient(rgb(6 4 3 / 0.94), rgb(6 4 3 / 0.72) 55%, transparent);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.7s var(--ease-lamp);
+  }
+
+  .header.is-scrolled::before {
+    opacity: 1;
+  }
+
+  .header.is-away {
+    transform: translateY(-120%);
+  }
+
+  :global(html.is-watching) .header {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  :global(html.is-arriving) .header {
+    animation: an-header-in 1.6s var(--ease-lamp) 1.9s both;
+  }
+
+  .header__bar {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: clamp(1rem, 3vw, 2.5rem);
+    height: var(--header-h);
+  }
+
+  .header__brand {
+    margin-right: auto;
+    text-decoration: none;
+    transition: opacity 0.8s var(--ease-lamp);
+  }
+
+  .header.is-over-masthead .header__brand {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .header__nav ul {
+    display: flex;
+    gap: clamp(1.2rem, 2.6vw, 2.4rem);
+  }
+
+  .header__nav a {
+    position: relative;
+    display: block;
+    padding-block: 0.6em;
+    color: var(--text);
+    text-decoration: none;
+  }
+
+  .header__nav a.is-dark {
+    color: var(--text-dim);
+  }
+
+  /* El rombo marca la estancia en la que se está y asoma al acercar el puntero */
+  .header__nav a::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: calc(50% - 0.08em);
+    width: 5px;
+    height: 5px;
+    margin-left: -2.5px;
+    background: var(--ember-400);
+    opacity: 0;
+    transform: rotate(45deg) scale(0.2);
+    transition:
+      opacity 0.45s var(--ease-lamp),
+      transform 0.45s var(--ease-lamp);
+  }
+
+  .header__nav a:hover,
+  .header__nav a[aria-current='page'] {
+    color: var(--candle);
+  }
+
+  .header__nav a:hover::after,
+  .header__nav a[aria-current='page']::after {
+    opacity: 1;
+    transform: rotate(45deg);
+  }
+
+  .header__tools {
+    display: flex;
+    align-items: center;
+    gap: 1.4rem;
+  }
+
+  .header__tool {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.65em;
+    padding-block: 0.6em;
+    color: var(--text);
+    transition: color 0.45s var(--ease-lamp);
+  }
+
+  .header__tool:hover,
+  .header__tool[aria-expanded='true'] {
+    color: var(--candle);
+  }
+
+  .header__tool--menu {
+    display: none;
+  }
+
+  .flame {
+    width: 0.62em;
+    height: auto;
+    overflow: visible;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.2;
+    transform-origin: 50% 100%;
+    transition:
+      fill 0.6s,
+      stroke 0.6s,
+      filter 0.6s;
+  }
+
+  /* Con el sonido encendido, la llama prende */
+  .flame:global(.is-on) {
+    fill: var(--ember-300);
+    stroke: var(--ember-400);
+    filter: drop-shadow(0 0 0.4em rgb(236 141 68 / 0.9));
+    animation: an-flame 2.3s ease-in-out infinite;
+  }
+
+  .atmos {
+    position: absolute;
+    top: calc(100% - 0.4rem);
+    right: 0;
+    width: min(23rem, 100%);
+    padding: 1.3rem 1.4rem 1.2rem;
+    border: 1px solid var(--rule);
+    background: rgb(13 9 7 / 0.97);
+    box-shadow:
+      0 0 0 3px rgb(13 9 7 / 0.97),
+      0 0 0 4px var(--rule-faint),
+      0 1.6rem 3rem -1rem #000;
+    animation: an-panel-in 0.5s var(--ease-lamp);
+  }
+
+  .atmos__title {
+    margin-bottom: 0.8rem;
+    color: var(--brass-300);
+    letter-spacing: 0.2em;
+  }
+
+  .atmos button {
+    display: flex;
+    align-items: baseline;
+    gap: 0.75em;
+    width: 100%;
+    padding-block: 0.5em;
+    letter-spacing: 0.1em;
+    text-align: left;
+    color: var(--text);
+    transition: color 0.4s;
+  }
+
+  .atmos button:hover,
+  .atmos button[aria-pressed='true'] {
+    color: var(--text-bright);
+  }
+
+  .atmos .lamp {
+    align-self: center;
+  }
+
+  .atmos .leader {
+    margin-inline: 0;
+  }
+
+  .atmos__state {
+    font-family: var(--font-title);
+    font-style: italic;
+    font-size: 1.12em;
+    letter-spacing: 0.02em;
+    color: var(--text-dim);
+  }
+
+  .atmos button[aria-pressed='true'] .atmos__state {
+    color: var(--ember-300);
+  }
+
+  .atmos__note {
+    margin-top: 0.9rem;
+    padding-top: 0.9rem;
+    border-top: 1px solid var(--rule-faint);
+    font-family: var(--font-body);
+    font-style: italic;
+    font-size: 0.92em;
+    line-height: 1.5;
+    letter-spacing: 0;
+    color: var(--text-dim);
+  }
+
+  @keyframes an-header-in {
+    from { opacity: 0; }
+  }
+
+  @keyframes an-panel-in {
+    from { opacity: 0; transform: translateY(-0.4rem); }
+  }
+
+  @keyframes an-flame {
+    0%, 100% { transform: scale(1) skewX(0deg); }
+    30% { transform: scale(1.06, 1.12) skewX(-3deg); }
+    55% { transform: scale(0.97, 0.94) skewX(2deg); }
+    80% { transform: scale(1.03, 1.08) skewX(-1deg); }
+  }
+
+  /* Índice a toda pantalla, para pantallas estrechas */
+  .menu {
+    width: 100%;
+    max-width: none;
+    height: 100%;
+    max-height: none;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: rgb(6 4 3 / 0.97);
+    color: var(--text);
+  }
+
+  .menu[open] {
+    animation: an-menu-in 0.7s var(--ease-lamp);
+  }
+
+  .menu::backdrop {
+    background: #000;
+  }
+
+  .menu__sheet {
+    position: relative;
+    display: grid;
+    align-content: center;
+    gap: 2.6rem;
+    min-height: 100%;
+    padding: 5rem var(--gutter) 3.5rem;
+    background: radial-gradient(ellipse 130% 55% at 50% 112%, rgb(217 100 42 / 0.3), transparent 72%);
+  }
+
+  .menu__close {
+    position: absolute;
+    top: 1.35rem;
+    right: var(--gutter);
+    padding: 0.4em 0;
+    color: var(--brass-300);
+  }
+
+  .menu ul {
+    display: grid;
+    gap: 1.7rem;
+  }
+
+  .menu li a {
+    display: grid;
+    grid-template-columns: 2.8rem 1fr;
+    align-items: baseline;
+    text-decoration: none;
+  }
+
+  .menu__numeral {
+    color: var(--brass-500);
+  }
+
+  .menu__label {
+    font-family: var(--font-display);
+    font-size: var(--step-3);
+    line-height: 1.05;
+    letter-spacing: 0.01em;
+    color: var(--text-bright);
+  }
+
+  .menu__plain {
+    grid-column: 2;
+    font-family: var(--font-title);
+    font-style: italic;
+    font-size: var(--step-0);
+    letter-spacing: 0.02em;
+    color: var(--text-dim);
+  }
+
+  .menu a.is-dark .menu__label {
+    color: var(--text-dim);
+  }
+
+  .menu__home {
+    justify-self: start;
+    margin-left: 2.8rem;
+    color: var(--brass-300);
+    text-decoration: none;
+  }
+
+  @keyframes an-menu-in {
+    from { opacity: 0; }
+  }
+
+  @media (max-width: 54rem) {
+    .header__nav {
+      display: none;
+    }
+
+    .header__tool--menu {
+      display: inline-flex;
+    }
+
+    .header__tool-label {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+    }
+
+    .flame {
+      width: 0.8em;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .flame:global(.is-on),
+    :global(html.is-arriving) .header {
+      animation: none;
+    }
+  }
+</style>

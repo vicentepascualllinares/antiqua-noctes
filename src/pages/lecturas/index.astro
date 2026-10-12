@@ -1,0 +1,80 @@
+---
+import ClosedRoom from '@/components/ui/ClosedRoom.astro';
+import PageHead from '@/components/ui/PageHead.astro';
+import { roomById } from '@/config/site';
+import Base from '@/layouts/Base.astro';
+import { getReadings } from '@/lib/collections';
+
+const room = roomById('literature');
+const readings = await getReadings();
+---
+
+<Base title={room.label} description={room.blurb}>
+  <PageHead kicker={`Estancia ${room.numeral}`} title={room.label} lead={room.blurb} />
+
+  {
+    readings.length > 0 ? (
+      <div class="wrap wrap--narrow">
+        <ol class="index">
+          {readings.map(({ href, entry }, index) => (
+            <li data-reveal style={`--i:${index % 5}`}>
+              <a href={href}>
+                <span class="index__title">{entry.data.title}</span>
+                <span class="leader" />
+                <span class="index__data">{[entry.data.author, entry.data.year].filter(Boolean).join(' · ')}</span>
+                {entry.data.summary && <span class="index__summary">{entry.data.summary}</span>}
+              </a>
+            </li>
+          ))}
+        </ol>
+      </div>
+    ) : (
+      <ClosedRoom room={room} back={{ href: roomById('films').href, label: 'Ir al cinematógrafo' }} />
+    )
+  }
+</Base>
+
+<style>
+  .index {
+    padding-bottom: clamp(4rem, 10vw, 8rem);
+  }
+
+  .index li + li {
+    border-top: 1px solid var(--rule-faint);
+  }
+
+  .index a {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    padding-block: 1.25rem;
+    text-decoration: none;
+  }
+
+  .index__title {
+    font-family: var(--font-title);
+    font-size: var(--step-2);
+    line-height: 1.15;
+    color: var(--text-bright);
+    transition: color 0.45s var(--ease-lamp);
+  }
+
+  .index a:hover .index__title {
+    color: var(--ember-300);
+  }
+
+  .index__data {
+    font-family: var(--font-caps);
+    font-size: var(--step--1);
+    letter-spacing: 0.14em;
+    font-variant-numeric: lining-nums;
+    color: var(--text-dim);
+  }
+
+  .index__summary {
+    width: 100%;
+    margin-top: 0.4rem;
+    font-style: italic;
+    color: var(--text);
+  }
+</style>

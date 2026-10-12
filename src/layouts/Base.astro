@@ -1,0 +1,73 @@
+---
+import '@/styles/global.css';
+import { ClientRouter } from 'astro:transitions';
+import displayFont from '@fontsource/im-fell-french-canon/files/im-fell-french-canon-latin-400-normal.woff2?url';
+import bodyFont from '@fontsource/libre-caslon-text/files/libre-caslon-text-latin-400-normal.woff2?url';
+import AmbienceBack from '@/components/layout/AmbienceBack.astro';
+import AmbienceFront from '@/components/layout/AmbienceFront.astro';
+import Footer from '@/components/layout/Footer.astro';
+import Header from '@/components/layout/Header.astro';
+import { site } from '@/config/site';
+
+interface Props {
+  /** Título de la página; sin él se usa el nombre de la casa con su lema. */
+  title?: string;
+  description?: string;
+  /** La portada lleva el rótulo grande: la cabecera esconde el suyo mientras se vea. */
+  overMasthead?: boolean;
+}
+const { title, description = site.description, overMasthead = false } = Astro.props;
+
+const pageTitle = title ? `${title} · ${site.name}` : `${site.name} · Noches de otro tiempo`;
+const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site).href : undefined;
+---
+
+<!doctype html>
+<html lang={site.lang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{pageTitle}</title>
+    <meta name="description" content={description} />
+    <meta name="theme-color" content="#0b0806" />
+    <meta name="color-scheme" content="dark" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    {canonical && <link rel="canonical" href={canonical} />}
+    <meta property="og:site_name" content={site.name} />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <link rel="preload" as="font" type="font/woff2" href={displayFont} crossorigin />
+    <link rel="preload" as="font" type="font/woff2" href={bodyFont} crossorigin />
+
+    <script is:inline>
+      // Antes de pintar: avisa a las hojas de estilo de que hay JavaScript y de si
+      // es la primera visita de la noche (entonces el fuego «prende» al entrar).
+      (() => {
+        const root = document.documentElement;
+        root.classList.add('js');
+        document.addEventListener('astro:after-swap', () => root.classList.add('js'));
+        try {
+          if (!sessionStorage.getItem('an:llegada')) {
+            root.classList.add('is-arriving');
+            sessionStorage.setItem('an:llegada', '1');
+          }
+        } catch {}
+      })();
+    </script>
+    <ClientRouter />
+  </head>
+  <body>
+    <AmbienceBack />
+    <a class="skip" href="#contenido">Saltar al contenido</a>
+    <Header overMasthead={overMasthead} />
+    <main id="contenido">
+      <slot />
+    </main>
+    <Footer />
+    <AmbienceFront />
+    <script>
+      import '@/scripts/main';
+    </script>
+  </body>
+</html>

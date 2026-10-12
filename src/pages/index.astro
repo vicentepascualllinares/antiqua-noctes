@@ -1,0 +1,56 @@
+---
+import Epigraph from '@/components/home/Epigraph.astro';
+import Hero from '@/components/home/Hero.astro';
+import Programme from '@/components/home/Programme.astro';
+import Rooms from '@/components/home/Rooms.astro';
+import Tonight from '@/components/home/Tonight.astro';
+import DevNote from '@/components/ui/DevNote.astro';
+import Plaque from '@/components/ui/Plaque.astro';
+import { roomById } from '@/config/site';
+import Base from '@/layouts/Base.astro';
+import { getFilms, pickFeatured } from '@/lib/films';
+import { getRoomStates } from '@/lib/rooms';
+
+const films = await getFilms();
+const featured = pickFeatured(films);
+const rooms = await getRoomStates();
+---
+
+<Base overMasthead>
+  <Hero />
+
+  {
+    featured ? (
+      <Tonight film={featured} />
+    ) : (
+      <section class="section" id="esta-noche">
+        <div class="wrap wrap--narrow" data-reveal>
+          <Plaque>
+            <p class="kicker">{roomById('films').label}</p>
+            <p class="waiting">El proyector aguarda</p>
+            <p>{roomById('films').closedNote}</p>
+          </Plaque>
+          <DevNote>
+            <p>
+              Copia las películas en <code>web/public/media/films/</code> y recarga la página: aparecerán solas.
+            </p>
+          </DevNote>
+        </div>
+      </section>
+    )
+  }
+
+  {films.length > 0 && <Programme films={films} />}
+  <Rooms rooms={rooms} />
+  <Epigraph />
+</Base>
+
+<style>
+  .waiting {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: var(--step-3);
+    line-height: 1.05;
+    color: var(--text-bright);
+  }
+</style>

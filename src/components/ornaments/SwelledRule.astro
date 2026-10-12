@@ -1,0 +1,31 @@
+---
+/** Filete hinchado con rombo: separa bloques como en una portada de imprenta. */
+interface Props {
+  width?: string;
+  class?: string;
+}
+const { width = '11rem', class: className } = Astro.props;
+---
+
+<svg
+  class:list={['swelled-rule', className]}
+  style={`--w:${width}`}
+  viewBox="0 0 240 12"
+  aria-hidden="true"
+  focusable="false"
+>
+  <path
+    d="M2 6C45 5.2 82 4.2 106 6 82 7.8 45 6.8 2 6ZM120 1l6.5 5-6.5 5-6.5-5ZM238 6C195 5.2 158 4.2 134 6c24 1.8 61 .8 104 0Z"
+  ></path>
+</svg>
+
+<style>
+  .swelled-rule {
+    display: block;
+    width: var(--w);
+    max-width: 100%;
+    height: auto;
+    margin-inline: auto;
+    fill: var(--brass-500);
+  }
+</style>

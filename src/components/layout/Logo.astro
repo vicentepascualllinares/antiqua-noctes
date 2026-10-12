@@ -1,0 +1,83 @@
+---
+import { site } from '@/config/site';
+
+/**
+ * AQUÍ VA EL LOGO.
+ * Hoy compone el nombre en tipos; cuando `site.logo` apunte a una imagen
+ * (src/config/site.ts), este mismo componente la mostrará en todos los sitios.
+ */
+interface Props {
+  variant?: 'masthead' | 'header' | 'footer';
+}
+const { variant = 'header' } = Astro.props;
+---
+
+{
+  site.logo ? (
+    <img
+      class:list={['logo', `logo--${variant}`, 'logo--image']}
+      src={site.logo.src}
+      width={site.logo.width}
+      height={site.logo.height}
+      alt={site.name}
+    />
+  ) : (
+    <span class:list={['logo', `logo--${variant}`]} data-logo-slot>
+      {site.wordmark.map((word) => <span class="logo__word">{word}</span>)}
+    </span>
+  )
+}
+
+<style>
+  .logo {
+    display: inline-flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    column-gap: 0.42em;
+    font-family: var(--font-display);
+    font-weight: 400;
+    line-height: 1;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    /* El espaciado deja un hueco a la derecha de la última letra: se compensa para centrar */
+    margin-right: -0.14em;
+    color: var(--text-bright);
+  }
+
+  .logo--header {
+    font-size: 1.02rem;
+    letter-spacing: 0.24em;
+    margin-right: -0.24em;
+  }
+
+  .logo--footer {
+    font-size: 1.35rem;
+    letter-spacing: 0.2em;
+    margin-right: -0.2em;
+    justify-content: flex-start;
+  }
+
+  .logo--masthead {
+    font-size: clamp(2.5rem, 9.4vw, 8.2rem);
+    row-gap: 0.12em;
+  }
+
+  .logo--image {
+    display: block;
+    width: auto;
+    margin: 0;
+  }
+
+  .logo--image.logo--header {
+    height: 2rem;
+  }
+
+  .logo--image.logo--footer {
+    height: 3rem;
+  }
+
+  .logo--image.logo--masthead {
+    height: auto;
+    width: min(100%, 44rem);
+  }
+</style>

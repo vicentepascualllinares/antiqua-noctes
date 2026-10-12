@@ -1,0 +1,76 @@
+---
+import LanternSlide from '@/components/films/LanternSlide.astro';
+import Arrow from '@/components/ornaments/Arrow.astro';
+import ClosedRoom from '@/components/ui/ClosedRoom.astro';
+import DevNote from '@/components/ui/DevNote.astro';
+import PageHead from '@/components/ui/PageHead.astro';
+import { roomById } from '@/config/site';
+import Base from '@/layouts/Base.astro';
+import { getFilms } from '@/lib/films';
+import { toRoman } from '@/lib/format';
+
+const room = roomById('films');
+const films = await getFilms();
+---
+
+<Base title={room.label} description={room.blurb}>
+  <PageHead kicker={`Estancia ${room.numeral}`} title={room.label} lead={room.blurb}>
+    {
+      films.length > 0 && (
+        <p class="count">
+          {toRoman(films.length)} {films.length === 1 ? 'cinta' : 'cintas'} en programa
+        </p>
+      )
+    }
+    {films.some((film) => film.video) && (
+      <a class="cta count__cta" href="/sala/">
+        Entrar en la sesión continua <Arrow />
+      </a>
+    )}
+  </PageHead>
+
+  {
+    films.length > 0 ? (
+      <div class="wrap">
+        <ul class="slides">
+          {films.map((film, index) => (
+            <li>
+              <LanternSlide film={film} index={index} />
+            </li>
+          ))}
+        </ul>
+      </div>
+    ) : (
+      <>
+        <ClosedRoom room={room} />
+        <div class="wrap">
+          <DevNote>
+            <p>
+              Copia las películas en <code>web/public/media/films/</code> y recarga la página: aparecerán solas.
+            </p>
+          </DevNote>
+        </div>
+      </>
+    )
+  }
+</Base>
+
+<style>
+  .count {
+    font-family: var(--font-caps);
+    font-size: var(--step--1);
+    letter-spacing: 0.2em;
+    color: var(--text-dim);
+  }
+
+  .count__cta {
+    margin-top: 0.4rem;
+  }
+
+  .slides {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr));
+    gap: clamp(2.2rem, 4vw, 3.6rem) clamp(1.4rem, 3vw, 2.6rem);
+    padding-bottom: clamp(4rem, 10vw, 8rem);
+  }
+</style>

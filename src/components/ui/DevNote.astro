@@ -1,0 +1,49 @@
+---
+/**
+ * Apunte para quien mantiene la casa. Sólo aparece con `npm run dev`;
+ * en la web publicada no existe.
+ */
+---
+
+{
+  import.meta.env.DEV && (
+    <aside class="dev-note">
+      <p class="dev-note__tag">Apunte para la casa · no sale en la web publicada</p>
+      <div class="dev-note__body">
+        <slot />
+      </div>
+    </aside>
+  )
+}
+
+<style>
+  .dev-note {
+    max-width: 46rem;
+    margin: clamp(2rem, 5vw, 3rem) auto 0;
+    padding: 1.1rem 1.3rem 1.2rem;
+    border: 1px dashed var(--brass-700);
+    font-size: var(--step--1);
+    line-height: 1.6;
+    color: var(--text);
+  }
+
+  .dev-note__tag {
+    margin-bottom: 0.5rem;
+    font-family: var(--font-caps);
+    letter-spacing: 0.14em;
+    color: var(--brass-300);
+  }
+
+  .dev-note__body :global(code) {
+    padding: 0.1em 0.4em;
+    background: rgb(155 125 69 / 0.14);
+    font-family: ui-monospace, 'Cascadia Mono', Consolas, monospace;
+    font-size: 0.9em;
+    color: var(--text-bright);
+    overflow-wrap: anywhere;
+  }
+
+  .dev-note__body :global(p + p) {
+    margin-top: 0.5rem;
+  }
+</style>

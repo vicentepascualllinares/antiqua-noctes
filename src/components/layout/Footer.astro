@@ -1,0 +1,173 @@
+---
+import SwelledRule from '@/components/ornaments/SwelledRule.astro';
+import { site } from '@/config/site';
+import { toRoman } from '@/lib/format';
+import { getRoomStates } from '@/lib/rooms';
+import Logo from './Logo.astro';
+
+const rooms = await getRoomStates();
+const year = toRoman(new Date().getFullYear());
+const hours = Array.from({ length: 12 }, (_, index) => index * 30);
+---
+
+<footer class="footer">
+  <div class="wrap">
+    <SwelledRule width="14rem" />
+
+    <div class="footer__grid">
+      <div class="footer__house">
+        <a href="/" aria-label={`${site.name}, portada`}><Logo variant="footer" /></a>
+        <p>Hecho para las horas en que la casa duerme.</p>
+      </div>
+
+      <nav aria-label="Estancias, al pie">
+        <ul class="footer__rooms">
+          {
+            rooms.map((room) => (
+              <li>
+                <a href={room.href}>
+                  <span class="footer__numeral">{room.numeral}</span>
+                  {room.label}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </nav>
+
+      <div class="footer__clock">
+        <svg class="watch" viewBox="0 0 64 64" aria-hidden="true" focusable="false">
+          <circle cx="32" cy="32" r="30"></circle>
+          <circle class="watch__inner" cx="32" cy="32" r="26.500"></circle>
+          {hours.map((angle) => <path class="watch__tick" d="M32 7v4" transform={`rotate(${angle} 32 32)`} />)}
+          <path class="watch__hand" data-clock-hour d="M32 34V18"></path>
+          <path class="watch__hand" data-clock-minute d="M32 35V11"></path>
+          <circle class="watch__pin" cx="32" cy="32" r="1.400"></circle>
+        </svg>
+        <p>
+          <span data-clock-time>La hora la pone usted.</span>
+          <span class="footer__aside" data-clock-aside></span>
+        </p>
+      </div>
+    </div>
+
+    <p class="footer__colophon">{site.name} · {year}</p>
+  </div>
+</footer>
+
+<style>
+  .footer {
+    position: relative;
+    z-index: 1;
+    padding-block: clamp(3rem, 8vw, 6rem) clamp(4rem, 10vw, 7rem);
+    font-size: var(--step--1);
+    color: var(--text-dim);
+  }
+
+  .footer__grid {
+    display: grid;
+    grid-template-columns: 1.3fr 1fr 1.2fr;
+    gap: clamp(2rem, 5vw, 4rem);
+    align-items: start;
+    margin-top: clamp(2.5rem, 6vw, 4.5rem);
+  }
+
+  .footer__house {
+    display: grid;
+    gap: 1rem;
+    justify-items: start;
+  }
+
+  .footer__house a {
+    text-decoration: none;
+  }
+
+  .footer__house p {
+    font-family: var(--font-title);
+    font-style: italic;
+    font-size: var(--step-0);
+  }
+
+  .footer__rooms {
+    display: grid;
+    gap: 0.5rem;
+    font-family: var(--font-caps);
+    letter-spacing: 0.14em;
+  }
+
+  .footer__rooms a {
+    display: inline-flex;
+    gap: 1em;
+    color: var(--text);
+    text-decoration: none;
+  }
+
+  .footer__rooms a:hover {
+    color: var(--ember-300);
+  }
+
+  .footer__numeral {
+    width: 1.6em;
+    color: var(--brass-500);
+  }
+
+  .footer__clock {
+    display: flex;
+    gap: 1.2rem;
+    align-items: center;
+  }
+
+  .footer__clock p {
+    display: grid;
+    gap: 0.15rem;
+    color: var(--text);
+    font-variant-numeric: lining-nums;
+  }
+
+  .footer__aside {
+    color: var(--text-dim);
+    font-style: italic;
+  }
+
+  .watch {
+    flex: none;
+    width: 4rem;
+    height: 4rem;
+    fill: none;
+    stroke: var(--brass-500);
+    stroke-width: 1;
+  }
+
+  .watch__inner {
+    stroke: var(--rule-faint);
+  }
+
+  .watch__tick {
+    stroke: var(--brass-300);
+  }
+
+  .watch__hand {
+    stroke: var(--text-bright);
+    stroke-linecap: round;
+    transition: transform 1s var(--ease-lamp);
+  }
+
+  .watch__pin {
+    fill: var(--ember-400);
+    stroke: none;
+  }
+
+  .footer__colophon {
+    margin-top: clamp(2.5rem, 6vw, 4rem);
+    font-family: var(--font-caps);
+    letter-spacing: 0.3em;
+    text-align: center;
+    color: var(--brass-500);
+  }
+
+  @media (max-width: 52rem) {
+    .footer__grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

@@ -1,0 +1,40 @@
+---
+import SwelledRule from '@/components/ornaments/SwelledRule.astro';
+
+/** Cabecera de una estancia o de una obra: sobretítulo, título, filete y entradilla. */
+interface Props {
+  kicker?: string;
+  title: string;
+  lead?: string;
+}
+const { kicker, title, lead } = Astro.props;
+---
+
+<header class="page-head wrap">
+  {kicker && <p class="kicker">{kicker}</p>}
+  <h1 class="page-head__title">{title}</h1>
+  <SwelledRule />
+  {lead && <p class="page-head__lead lead">{lead}</p>}
+  <slot />
+</header>
+
+<style>
+  .page-head {
+    display: grid;
+    justify-items: center;
+    gap: 1.15rem;
+    padding-top: calc(var(--header-h) + clamp(3rem, 8vw, 6rem));
+    padding-bottom: clamp(2.6rem, 6vw, 4.6rem);
+    text-align: center;
+  }
+
+  .page-head__title {
+    font-family: var(--font-display);
+    font-size: var(--step-4);
+    line-height: 1;
+  }
+
+  .page-head__lead {
+    max-width: 36ch;
+  }
+</style>

@@ -1,0 +1,44 @@
+---
+import Arrow from '@/components/ornaments/Arrow.astro';
+import type { Room } from '@/config/site';
+import Plaque from './Plaque.astro';
+
+/** Lo que se encuentra quien entra en una estancia que todavía no tiene nada. */
+interface Props {
+  room: Room;
+  /** Adónde invitar a ir mientras tanto. */
+  back?: { href: string; label: string };
+}
+const { room, back = { href: '/', label: 'Volver a la portada' } } = Astro.props;
+---
+
+<div class="closed wrap wrap--narrow">
+  <Plaque>
+    <p class="kicker">Estancia {room.numeral}</p>
+    <p class="closed__title">Aún a oscuras</p>
+    <p class="closed__note">{room.closedNote}</p>
+    <a class="cta" href={back.href}>{back.label} <Arrow /></a>
+  </Plaque>
+</div>
+
+<style>
+  .closed {
+    padding-bottom: clamp(4rem, 10vw, 8rem);
+  }
+
+  .closed__title {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: var(--step-3);
+    line-height: 1.05;
+    color: var(--text-bright);
+  }
+
+  .closed__note {
+    max-width: 34ch;
+  }
+
+  .closed .cta {
+    margin-top: 0.8rem;
+  }
+</style>

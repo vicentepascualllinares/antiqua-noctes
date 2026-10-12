@@ -1,0 +1,92 @@
+---
+import LanternSlide from '@/components/films/LanternSlide.astro';
+import Arrow from '@/components/ornaments/Arrow.astro';
+import type { Film } from '@/lib/films';
+import { formatDuration, toRoman } from '@/lib/format';
+
+/** La cinta que encabeza la velada. */
+interface Props {
+  film: Film;
+}
+const { film } = Astro.props;
+const meta = [film.year && toRoman(film.year), film.director, formatDuration(film.duration)].filter(Boolean);
+---
+
+<section class="tonight section" id="esta-noche">
+  <div class="tonight__grid wrap">
+    <div class="tonight__slide">
+      <LanternSlide film={film} bare />
+    </div>
+
+    <div class="tonight__text" data-reveal style="--i:2">
+      <p class="kicker">Esta noche se proyecta</p>
+      <h2 class="tonight__title display">{film.title}</h2>
+      {
+        meta.length > 0 && (
+          <p class="tonight__meta">
+            {meta.map((item, index) => (
+              <>
+                {index > 0 && <span aria-hidden="true"> · </span>}
+                <span>{item}</span>
+              </>
+            ))}
+          </p>
+        )
+      }
+      {film.summary && <p class="tonight__summary">{film.summary}</p>}
+      <div class="tonight__actions">
+        <a class="cta" href={film.href}>Pasar a la sala <Arrow /></a>
+        <a class="more" href="/sala/">o la sesión continua <Arrow /></a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .tonight__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+    gap: clamp(2rem, 6vw, 5.5rem);
+    align-items: center;
+  }
+
+  .tonight__text {
+    display: grid;
+    justify-items: start;
+    gap: 1.1rem;
+  }
+
+  .tonight__title {
+    margin-top: 0.2rem;
+  }
+
+  .tonight__meta {
+    font-family: var(--font-caps);
+    font-size: var(--step--1);
+    letter-spacing: 0.16em;
+    font-variant-numeric: lining-nums;
+    color: var(--text-dim);
+  }
+
+  .tonight__summary {
+    max-width: 44ch;
+    font-family: var(--font-title);
+    font-style: italic;
+    font-size: var(--step-1);
+    line-height: 1.45;
+  }
+
+  .tonight__actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1rem 1.8rem;
+    margin-top: 0.8rem;
+  }
+
+  @media (max-width: 54rem) {
+    .tonight__grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

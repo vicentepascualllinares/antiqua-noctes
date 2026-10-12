@@ -1,0 +1,206 @@
+---
+import Logo from '@/components/layout/Logo.astro';
+import Arrow from '@/components/ornaments/Arrow.astro';
+import SwelledRule from '@/components/ornaments/SwelledRule.astro';
+import { site } from '@/config/site';
+---
+
+<section class="hero">
+  <div class="hero__inner wrap">
+    <p class="hero__over kicker">Abierta del anochecer al alba</p>
+
+    <!-- El rótulo grande: aquí irá la imagen del logo (ver Logo.astro) -->
+    <h1 class="hero__name" data-masthead>
+      <Logo variant="masthead" />
+    </h1>
+
+    <SwelledRule class="hero__rule" width="clamp(9rem, 22vw, 16rem)" />
+    <p class="hero__tagline lead">{site.tagline}</p>
+    <p class="hero__invitation">{site.invitation}</p>
+
+    <div class="hero__actions">
+      <a class="cta" href="#esta-noche">Ver el programa <Arrow /></a>
+      <button
+        class="hero__sound"
+        type="button"
+        data-atmos="sound"
+        data-on="Apagar el sonido de la tormenta"
+        data-off="Encender el sonido de la tormenta"
+        aria-pressed="false"
+      >
+        <span class="lamp"></span>
+        <span data-atmos-state>Encender el sonido de la tormenta</span>
+      </button>
+    </div>
+  </div>
+
+  <span class="hero__pendulum" aria-hidden="true"></span>
+</section>
+
+<style>
+  .hero {
+    /* Unidad de aire vertical: se encoge en pantallas bajas para que todo quepa a la vista */
+    --v: clamp(0.55rem, 1.9svh, 1.1rem);
+    position: relative;
+    display: grid;
+    place-items: center;
+    min-height: 100svh;
+    padding: calc(var(--header-h) + var(--v)) 0 calc(var(--v) * 6);
+    text-align: center;
+  }
+
+  .hero__inner {
+    display: grid;
+    justify-items: center;
+  }
+
+  .hero__over {
+    margin-bottom: calc(var(--v) * 2.2);
+  }
+
+  .hero__name {
+    font-size: inherit;
+    line-height: 1;
+  }
+
+  /* El nombre recibe la luz de la lumbre desde abajo y tiembla con ella */
+  .hero__name :global(.logo:not(.logo--image)) {
+    background: linear-gradient(to top, #f6c283 2%, #eedcb7 40%, #b7ab96 80%, #8c8884);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    filter: drop-shadow(0 0.05em 0.45em rgb(217 100 42 / 0.24));
+    animation: an-firelit 4.7s linear infinite;
+  }
+
+
+
+  /* Cabe en una línea en pantallas anchas y se parte en dos, sola, en las estrechas */
+  .hero__name :global(.logo--masthead:not(.logo--image)) {
+    font-size: clamp(2.6rem, min(13vw, 14svh), 8.2rem);
+  }
+
+  .hero :global(.hero__rule) {
+    margin-top: calc(var(--v) * 2.1);
+  }
+
+  .hero__tagline {
+    max-width: 31ch;
+    margin-top: calc(var(--v) * 1.8);
+    color: var(--text-bright);
+  }
+
+  .hero__invitation {
+    max-width: 62ch;
+    margin-top: calc(var(--v) * 0.8);
+    color: var(--text-dim);
+  }
+
+  .hero__actions {
+    display: grid;
+    justify-items: center;
+    gap: calc(var(--v) * 1.2);
+    margin-top: calc(var(--v) * 2.6);
+  }
+
+
+
+  .hero__sound {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.8em;
+    padding-block: 0.3em;
+    font-family: var(--font-caps);
+    font-size: var(--step--1);
+    letter-spacing: 0.14em;
+    color: var(--text-dim);
+    transition: color 0.5s var(--ease-lamp);
+  }
+
+  .hero__sound:hover,
+  .hero__sound[aria-pressed='true'] {
+    color: var(--text-bright);
+  }
+
+  /* Un péndulo marca el paso lento de la noche e invita a seguir bajando */
+  .hero__pendulum {
+    position: absolute;
+    bottom: calc(var(--v) * 1.5);
+    left: 50%;
+    width: 1px;
+    height: calc(var(--v) * 2.6);
+    background: linear-gradient(transparent, var(--brass-500));
+    transform-origin: 50% 0;
+    animation: an-pendulum 2.6s ease-in-out infinite alternate;
+  }
+
+  .hero__pendulum::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: -3.5px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--brass-300);
+    box-shadow: 0 0 0.6rem rgb(236 141 68 / 0.5);
+  }
+
+  /* Primera visita de la noche: todo emerge de la oscuridad a medida que prende el fuego */
+  :global(html.is-arriving) .hero__name {
+    animation: an-kindle 2.8s var(--ease-lamp) 0.5s both;
+  }
+
+  :global(html.is-arriving) .hero__over,
+  :global(html.is-arriving) .hero :global(.hero__rule),
+  :global(html.is-arriving) .hero__tagline,
+  :global(html.is-arriving) .hero__invitation,
+  :global(html.is-arriving) .hero__actions {
+    animation: an-emerge 1.8s var(--ease-lamp) both;
+  }
+
+  :global(html.is-arriving) .hero__pendulum {
+    animation:
+      an-pendulum 2.6s ease-in-out infinite alternate,
+      an-emerge 1.8s var(--ease-lamp) 3.4s both;
+  }
+
+  :global(html.is-arriving) .hero__over { animation-delay: 1.5s; }
+  :global(html.is-arriving) .hero :global(.hero__rule) { animation-delay: 1.9s; }
+  :global(html.is-arriving) .hero__tagline { animation-delay: 2.2s; }
+  :global(html.is-arriving) .hero__invitation { animation-delay: 2.6s; }
+  :global(html.is-arriving) .hero__actions { animation-delay: 3s; }
+
+  @keyframes an-firelit {
+    0%, 100% { filter: drop-shadow(0 0.05em 0.45em rgb(217 100 42 / 0.24)) brightness(1); }
+    18% { filter: drop-shadow(0 0.05em 0.5em rgb(217 100 42 / 0.32)) brightness(1.07); }
+    41% { filter: drop-shadow(0 0.05em 0.4em rgb(217 100 42 / 0.18)) brightness(0.94); }
+    63% { filter: drop-shadow(0 0.05em 0.5em rgb(217 100 42 / 0.3)) brightness(1.05); }
+    82% { filter: drop-shadow(0 0.05em 0.42em rgb(217 100 42 / 0.2)) brightness(0.97); }
+  }
+
+  @keyframes an-kindle {
+    0% { opacity: 0; }
+    22% { opacity: 0.4; }
+    30% { opacity: 0.18; }
+    52% { opacity: 0.82; }
+    60% { opacity: 0.62; }
+    100% { opacity: 1; }
+  }
+
+  @keyframes an-emerge {
+    from { opacity: 0; }
+  }
+
+  @keyframes an-pendulum {
+    from { rotate: -9deg; }
+    to { rotate: 9deg; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero__pendulum,
+    .hero__name :global(.logo) {
+      animation: none;
+    }
+  }
+</style>

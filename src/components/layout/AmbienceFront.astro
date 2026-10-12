@@ -1,0 +1,142 @@
+---
+/**
+ * Lo que cae por delante del contenido: el relámpago que entra por la ventana,
+ * la luz de la vela que sigue al puntero, el viñeteado y el grano.
+ * Nada de esto recibe clics.
+ */
+---
+
+<div class="veil" id="veil" transition:persist="veil" aria-hidden="true">
+  <div class="veil__storm" data-storm hidden>
+    <div class="veil__wall"></div>
+    <div class="veil__window"><i class="veil__rain"></i></div>
+  </div>
+  <div class="veil__candle" data-candle data-state="on"></div>
+  <div class="veil__vignette"></div>
+  <div class="veil__grain"></div>
+</div>
+
+<style>
+  .veil {
+    position: fixed;
+    inset: 0;
+    z-index: 40;
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  .veil > * {
+    position: absolute;
+  }
+
+  /* Relámpago: sólo existe durante el segundo que dura (storm.ts lo enciende y lo apaga) */
+  .veil__storm {
+    inset: 0;
+    opacity: 0;
+    mix-blend-mode: screen;
+    background: radial-gradient(ellipse 95% 85% at 12% 8%, rgb(195 210 222 / 0.2), transparent 82%);
+  }
+
+  /* Por un instante se ve el papel pintado de toda la pared */
+  .veil__wall {
+    position: absolute;
+    inset: 0;
+    background: rgb(195 210 222 / 0.2);
+    -webkit-mask: var(--wallpaper) 50% 100% / 96px 168px;
+    mask: var(--wallpaper) 50% 100% / 96px 168px;
+  }
+
+  /* La ventana proyectada sobre la pared, con la sombra de sus cuarterones */
+  .veil__window {
+    position: absolute;
+    top: -16%;
+    left: calc(-4% + var(--shift, 0vw));
+    width: 64vmax;
+    height: 118vmax;
+    transform: skewX(var(--lean, -16deg)) rotate(5deg);
+    transform-origin: top left;
+    overflow: hidden;
+    background:
+      linear-gradient(90deg, transparent calc(50% - 0.6vmax), #000 0 calc(50% + 0.6vmax), transparent 0),
+      repeating-linear-gradient(0deg, transparent 0 20vmax, #000 0 21.2vmax),
+      linear-gradient(180deg, rgb(205 219 230 / 0.42), rgb(127 149 168 / 0.16) 68%, transparent);
+    filter: blur(0.45vmax);
+    -webkit-mask-image: radial-gradient(ellipse 72% 62% at 46% 34%, #000 32%, transparent 76%);
+    mask-image: radial-gradient(ellipse 72% 62% at 46% 34%, #000 32%, transparent 76%);
+  }
+
+  /* El agua que corre por el cristal, vista como sombra */
+  .veil__rain {
+    position: absolute;
+    inset: -40px 0;
+    background: repeating-linear-gradient(
+      96deg,
+      transparent 0 13px,
+      rgb(0 0 0 / 0.42) 13px 14px,
+      transparent 14px 37px
+    );
+    animation: an-rain 0.45s linear infinite;
+  }
+
+  .veil__candle {
+    top: 0;
+    left: 0;
+    width: 46rem;
+    height: 46rem;
+    margin: -23rem 0 0 -23rem;
+    border-radius: 50%;
+    background: radial-gradient(
+      closest-side,
+      rgb(255 200 130 / 0.105),
+      rgb(255 170 90 / 0.045) 42%,
+      transparent 72%
+    );
+    mix-blend-mode: screen;
+    opacity: 0;
+    transition: opacity 1.4s var(--ease-lamp);
+    will-change: transform;
+  }
+
+  .veil__candle.is-lit {
+    opacity: 1;
+  }
+
+  .veil__candle[data-state='off'],
+  :global(html.is-projecting) .veil__candle {
+    opacity: 0;
+  }
+
+  .veil__vignette {
+    inset: 0;
+    background: radial-gradient(ellipse 120% 96% at 50% 46%, transparent 42%, rgb(3 2 1 / 0.64) 100%);
+  }
+
+  .veil__grain {
+    inset: -240px;
+    background: var(--grain);
+    opacity: 0.06;
+    animation: an-grain 0.9s steps(1) infinite;
+  }
+
+  @keyframes an-rain {
+    to {
+      transform: translateY(37px);
+    }
+  }
+
+  @keyframes an-grain {
+    0% { transform: translate(0, 0); }
+    17% { transform: translate(-83px, 61px); }
+    33% { transform: translate(47px, -112px); }
+    50% { transform: translate(-131px, -29px); }
+    67% { transform: translate(92px, 104px); }
+    83% { transform: translate(-38px, -77px); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .veil__grain,
+    .veil__rain {
+      animation: none;
+    }
+  }
+</style>

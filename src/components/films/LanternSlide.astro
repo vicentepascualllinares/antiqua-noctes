@@ -1,0 +1,194 @@
+---
+import type { Film } from '@/lib/films';
+import { formatDuration, toRoman } from '@/lib/format';
+
+/**
+ * Tarjeta de una cinta, montada como una placa de linterna mágica:
+ * marco oscuro, ventana de esquinas redondas y la marca del fabricante al pie.
+ * Sin cartel, la ventana muestra un fotograma de la película (slides.ts).
+ */
+interface Props {
+  film: Film;
+  /** Posición en la rejilla, para escalonar la entrada. */
+  index?: number;
+  /** Sólo la placa, sin título debajo (cuando el texto va aparte). */
+  bare?: boolean;
+}
+const { film, index = 0, bare = false } = Astro.props;
+const meta = [film.year, formatDuration(film.duration)].filter(Boolean).join(' · ');
+---
+
+<article class:list={['slide', { 'slide--bare': bare }]} data-reveal style={`--i:${index % 4}`}>
+  <a class="slide__link" href={film.href} data-slide data-has-poster={film.poster ? '' : undefined}>
+    <span class="slide__mount">
+      <span class="slide__aperture">
+        <span class="slide__plate" aria-hidden="true"><span>{film.title}</span></span>
+        {
+          film.video && (
+            <video data-src={film.video} data-at={film.posterTime} muted playsinline preload="none" tabindex="-1" />
+          )
+        }
+        {film.poster && <img src={film.poster} alt="" loading="lazy" decoding="async" />}
+        <span class="slide__lens"></span>
+      </span>
+      <span class="slide__no">N.º {toRoman(film.number)}</span>
+    </span>
+    <span class:list={['slide__label', { 'sr-only': bare }]}>
+      <span class="slide__title">{film.title}</span>
+      {meta && <span class="slide__meta">{meta}</span>}
+    </span>
+  </a>
+</article>
+
+<style>
+  .slide__link {
+    display: block;
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .slide__mount {
+    position: relative;
+    display: block;
+    padding: 0.9rem 0.9rem 2.15rem;
+    border: 1px solid rgb(155 125 69 / 0.26);
+    background: linear-gradient(165deg, #1c1510, #0e0a08 72%);
+    box-shadow:
+      inset 0 0 0 1px rgb(0 0 0 / 0.65),
+      0 1.6rem 2.6rem -1.5rem #000;
+    transition: border-color 0.7s var(--ease-lamp);
+  }
+
+  /* La marca de la casa, como el sello del fabricante en las placas */
+  .slide__mount::after {
+    content: 'A · N';
+    position: absolute;
+    right: 1rem;
+    bottom: 0.58rem;
+    font-family: var(--font-caps);
+    font-size: 0.7rem;
+    letter-spacing: 0.24em;
+    color: var(--brass-700);
+  }
+
+  .slide__no {
+    position: absolute;
+    bottom: 0.58rem;
+    left: 1rem;
+    font-family: var(--font-caps);
+    font-size: 0.7rem;
+    letter-spacing: 0.22em;
+    font-variant-numeric: lining-nums;
+    color: var(--brass-500);
+  }
+
+  .slide__aperture {
+    position: relative;
+    display: block;
+    overflow: hidden;
+    aspect-ratio: 4 / 3;
+    border-radius: 1.05rem;
+    background: #050403;
+    box-shadow: 0 0 0 1px rgb(201 170 108 / 0.32);
+    isolation: isolate;
+  }
+
+  .slide__aperture img,
+  .slide__aperture video {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: sepia(0.42) contrast(1.06) brightness(0.7);
+    transition:
+      opacity 0.9s var(--ease-lamp),
+      filter 1.2s var(--ease-lamp),
+      transform 2.4s var(--ease-lamp);
+  }
+
+  .slide__aperture video {
+    opacity: 0;
+  }
+
+  .slide__link:global(.has-frame) video,
+  .slide__link:global(.is-running) video {
+    opacity: 1;
+  }
+
+  .slide__link:global(.is-running) img {
+    opacity: 0;
+  }
+
+  /* Mientras no hay imagen, la ventana anuncia el título como un rótulo */
+  .slide__plate {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    padding: 1.4rem;
+    background: radial-gradient(ellipse 90% 70% at 50% 125%, rgb(143 54 19 / 0.32), transparent 70%);
+    font-family: var(--font-title);
+    font-style: italic;
+    font-size: var(--step-1);
+    line-height: 1.2;
+    text-align: center;
+    text-wrap: balance;
+    color: rgb(237 223 192 / 0.6);
+  }
+
+  /* La caída de luz de la lente hacia los bordes; se abre al encender la lámpara */
+  .slide__lens {
+    position: absolute;
+    inset: 0;
+    box-shadow: inset 0 0 3.2rem 1.1rem rgb(0 0 0 / 0.78);
+    transition: opacity 1.1s var(--ease-lamp);
+  }
+
+  .slide__label {
+    display: block;
+    margin-top: 1rem;
+    padding-inline: 0.15rem;
+  }
+
+  .slide__title {
+    display: block;
+    font-family: var(--font-title);
+    font-size: var(--step-1);
+    line-height: 1.2;
+    color: var(--text-bright);
+    transition: color 0.5s var(--ease-lamp);
+  }
+
+  .slide__meta {
+    display: block;
+    margin-top: 0.35rem;
+    font-family: var(--font-caps);
+    font-size: var(--step--1);
+    letter-spacing: 0.14em;
+    font-variant-numeric: lining-nums;
+    color: var(--text-dim);
+  }
+
+  .slide__link:hover .slide__mount,
+  .slide__link:focus-visible .slide__mount {
+    border-color: rgb(201 170 108 / 0.6);
+  }
+
+  .slide__link:hover img,
+  .slide__link:hover video,
+  .slide__link:focus-visible img,
+  .slide__link:focus-visible video {
+    filter: sepia(0.22) contrast(1.04) brightness(1);
+    transform: scale(1.035);
+  }
+
+  .slide__link:hover .slide__lens,
+  .slide__link:focus-visible .slide__lens {
+    opacity: 0.45;
+  }
+
+  .slide__link:hover .slide__title {
+    color: var(--candle);
+  }
+</style>

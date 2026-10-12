@@ -1,0 +1,44 @@
+---
+import ContinuousScreen from '@/components/films/ContinuousScreen.astro';
+import Arrow from '@/components/ornaments/Arrow.astro';
+import ClosedRoom from '@/components/ui/ClosedRoom.astro';
+import PageHead from '@/components/ui/PageHead.astro';
+import { roomById } from '@/config/site';
+import Base from '@/layouts/Base.astro';
+import { getFilms } from '@/lib/films';
+
+const room = roomById('films');
+const playable = (await getFilms()).filter((film) => film.video);
+
+const lead =
+  playable.length > 1
+    ? 'Las cintas se encadenan solas, sin fin y en orden distinto cada noche. Entre y mire lo que echan; nadie le obliga a quedarse ni a marcharse.'
+    : 'Una sola cinta, en bucle, hasta que la casa reúna más. Entre y mire lo que echan.';
+---
+
+<Base title="Sesión continua" description="Las películas de la casa, encadenadas sin fin, en orden distinto cada noche.">
+  <PageHead kicker="Función de entrada libre" title="Sesión continua" lead={playable.length ? lead : undefined} />
+
+  {
+    playable.length > 0 ? (
+      <div class="wrap">
+        <ContinuousScreen films={playable} />
+        <p class="sala__back">
+          <a class="more" href={room.href}>
+            Ver el programa, cinta por cinta <Arrow />
+          </a>
+        </p>
+      </div>
+    ) : (
+      <ClosedRoom room={room} back={{ href: room.href, label: `Ir al ${room.label.toLowerCase()}` }} />
+    )
+  }
+</Base>
+
+<style>
+  .sala__back {
+    margin-top: clamp(2rem, 5vw, 3.5rem);
+    padding-bottom: clamp(4rem, 10vw, 8rem);
+    text-align: center;
+  }
+</style>

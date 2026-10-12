@@ -1,0 +1,78 @@
+:root {
+  color-scheme: dark;
+
+  /* Tinieblas: negros cálidos, de hollín y de nogal */
+  --soot-950: #060403;
+  --soot-900: #0b0806;
+  --soot-800: #120d0a;
+  --soot-700: #1a130e;
+  --soot-600: #251b14;
+  --soot-500: #33261c;
+
+  /* Lumbre */
+  --ember-300: #f6b269;
+  --ember-400: #ec8d44;
+  --ember-500: #d9642a;
+  --ember-700: #8f3613;
+  --candle: #f7e3b5;
+
+  /* Papel */
+  --paper-100: #e6d8b6;
+  --paper-200: #d3c29b;
+  --paper-300: #bba981;
+  --paper-ink: #1f150e;
+  --paper-ink-dim: #55432f;
+
+  /* Vino */
+  --wine-300: #b8485c;
+  --wine-500: #7b1a2c;
+  --wine-700: #4b0e19;
+
+  /* Latón */
+  --brass-300: #c9aa6c;
+  --brass-500: #9b7d45;
+  --brass-700: #5e4b28;
+
+  /* Tormenta */
+  --storm-200: #c3d2de;
+  --storm-400: #7f95a8;
+
+  /* Papeles que cumple cada color */
+  --bg: var(--soot-900);
+  --text: #c9b792;
+  --text-dim: #93846a;
+  --text-bright: #eddfc0;
+  --rule: rgb(155 125 69 / 0.42);
+  --rule-faint: rgb(155 125 69 / 0.2);
+  --focus: var(--ember-300);
+
+  /* Tipos */
+  --font-display: 'IM Fell French Canon', 'Libre Caslon Text', Georgia, serif;
+  --font-title: 'IM Fell Double Pica', 'Libre Caslon Text', Georgia, serif;
+  --font-caps: 'IM Fell English SC', 'Libre Caslon Text', Georgia, serif;
+  --font-body: 'Libre Caslon Text', 'Iowan Old Style', 'Palatino Linotype', Georgia, serif;
+
+  /* Cuerpos */
+  --step--1: clamp(0.86rem, 0.82rem + 0.16vw, 0.95rem);
+  --step-0: clamp(1.04rem, 0.99rem + 0.24vw, 1.18rem);
+  --step-1: clamp(1.28rem, 1.16rem + 0.55vw, 1.6rem);
+  --step-2: clamp(1.65rem, 1.36rem + 1.3vw, 2.4rem);
+  --step-3: clamp(2.15rem, 1.6rem + 2.5vw, 3.7rem);
+  --step-4: clamp(2.7rem, 1.5rem + 5.6vw, 6.4rem);
+
+  /* Medidas */
+  --measure: 62ch;
+  --gutter: clamp(1.25rem, 4vw, 3.5rem);
+  --page: 78rem;
+  --header-h: 4.25rem;
+
+  /* Movimiento */
+  --ease-lamp: cubic-bezier(0.22, 0.61, 0.21, 1);
+  --ease-iris: cubic-bezier(0.5, 0, 0.18, 1);
+
+  /* Grano de película, generado sin imágenes */
+  --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 .95 0 0 0 0 .85 0 0 0 .6 -.05'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+
+  /* Papel pintado: una celosía de ojivas que sólo se adivina donde llega la luz */
+  --wallpaper: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='168' viewBox='0 0 96 168' fill='none' stroke='%23c9aa6c' stroke-width='1'%3E%3Cpath d='M48 0C84 30 84 54 48 84 12 114 12 138 48 168M48 0C12 30 12 54 48 84 84 114 84 138 48 168M0 84C36 114 36 138 0 168M0 84C36 54 36 30 0 0M96 84C60 114 60 138 96 168M96 84C60 54 60 30 96 0'/%3E%3Cpath d='M48 34l5 8-5 8-5-8zM0 118l5 8-5 8-5-8zM96 118l5 8-5 8-5-8z' fill='%23c9aa6c' stroke='none'/%3E%3C/svg%3E");
+}
