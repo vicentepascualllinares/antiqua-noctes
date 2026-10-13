@@ -1,0 +1,11 @@
+{
+  // Publicación en Cloudflare: la web es estática, así que basta con servir
+  // lo que `npm run build` deja en dist/. Sin este archivo, Cloudflare intenta
+  // configurarla por su cuenta y la compila sin ver las películas.
+  "name": "antiqua-noctes",
+  "compatibility_date": "2026-01-01",
+  "assets": {
+    "directory": "./dist",
+    "not_found_handling": "404-page"
+  }
+}
